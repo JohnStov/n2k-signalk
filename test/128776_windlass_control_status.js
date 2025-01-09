@@ -1,0 +1,60 @@
+var chai = require('chai')
+chai.Should()
+chai.use(require('chai-things'))
+chai.use(require('@signalk/signalk-schema').chaiModule)
+
+describe('128776 Windlass Control Status', function () {
+  it('full windlass control sentence converts',
+    function () {
+      var tree = require('./testMapper').toNested(
+        JSON.parse(
+          '{"prio":2,"pgn":128776,"dst":255,"src":36,"timestamp":"2011-11-24-22:42:04.440","fields":{"SID":170,"Windlass ID":0,"Windlass Direction Control":0,"Speed Control":0,"Speed Control Type":0,"Anchor Docking Control":0,"Power Enable":0,"Mechanical Lock":0,"Deck and Anchor Wash":0,"Anchor Light":0,"Command Timeout":"00:00:00.85000","Windlass Control Events":[]}}'
+        )
+      )
+      tree.should.have.with.nested.property(
+        'winches.windlass0.type.value',
+        'windlass'
+      )
+      tree.should.have.with.nested.property(
+        'winches.windlass0.control.value',
+        'stop'
+      )
+      tree.should.have.with.nested.property(
+        'winches.windlass0.inService.value', 
+        'no'
+      )
+// Waiting for merge of PR#601  
+//    tree.should.be.validSignalKVesselIgnoringIdentity
+    }),
+    it('minimal windlass control sentence converts', function () {
+      var tree = require('./testMapper').toNested(
+        JSON.parse(
+          '{"prio":2,"pgn":128776,"dst":255,"src":36,"timestamp":"2011-11-24-22:42:04.440","fields":{"SID":170,"Windlass ID":0,"Windlass Direction Control":0,"Speed Control":0}}'
+        )
+      )
+      tree.should.have.with.nested.property(
+        'winches.windlass0.type.value',
+        'windlass'
+      )
+      tree.should.have.with.nested.property(
+        'winches.windlass0.control.value',
+        'stop'
+      )
+// Waiting for merge of PR#601  
+//    tree.should.be.validSignalKVesselIgnoringIdentity
+    }),
+    it('minimal windlass control sentence with events converts', function () {
+      var tree = require('./testMapper').toNested(
+        JSON.parse(
+          '{"prio":2,"pgn":128776,"dst":255,"src":36,"timestamp":"2011-11-24-22:42:04.440","fields":{"SID":170,"Windlass ID":0,"Windlass Direction Control":0,"Speed Control":0,"Windlass Control Events":["Another device controlling windlass"]}}'
+        )
+      )
+      tree.should.have.nested.property(
+        'notifications.winches.windlass0.anotherDeviceControllingWindlass.value.state',
+        'alarm'
+      )
+// Waiting for merge of PR#601  
+//    tree.should.be.validSignalKVesselIgnoringIdentity
+    })
+  })
+
